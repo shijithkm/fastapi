@@ -14,9 +14,9 @@
 # def read_item(item_id: int, q: Union[str, None] = None):
 #     return {"item_id": item_id, "q": q}
 
-from uuid import uuid4
+from uuid import uuid4,UUID
 from models import Gender, Role, User
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from typing import List, Union
 
 
@@ -68,3 +68,20 @@ def read_item(item_id: int,q: Union[str,None] = None):
 @app.get("/api/v1/users")
 async def users():
     return db
+
+@app.post("/api/v1/users")
+async def register_user(user:User):
+    db.append(user)
+    return {"user_id":user.id}
+
+@app.delete("/api/v1/users/{user_id}")
+async def delete_users(user_id: UUID):
+    for user in db:
+        if user.id == user_id:
+            db.remove(user)
+            return
+        
+    raise HTTPException(
+        status_code=404,
+        detail=f"User with id {user_id} does not exists" 
+    )
